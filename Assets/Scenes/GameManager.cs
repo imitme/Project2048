@@ -6,11 +6,14 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     public InputField count;
+    public int settingLimitNum = 4;
 
     public float myCellSize;
 
     public GameObject cellsPanel;
     public GameObject cellPrefab;
+    public GameObject cellNumPanel;
+    public GameObject cellNumPrefab;
 
     private Vector3 firstPos = Vector3.zero;
 
@@ -23,6 +26,8 @@ public class GameManager : MonoBehaviour
         int count = 4;
         SetGridMap(count);
         SetCells(count);
+
+        SetStartCellNumSettings(count);
     }
 
     private void SetGridMap(int count)
@@ -42,20 +47,50 @@ public class GameManager : MonoBehaviour
 
     private void SetCells(int count)
     {
-        Vector2 span = new Vector2(0, 0);
         for (int c = 0; c < count; c++)
         {
             for (int r = 0; r < count; r++)
             {
-                MakeCells(cellPrefab, cellsPanel, c, r, myCellSize);
+                DrawCells(cellPrefab, cellsPanel, c, r, myCellSize, string.Format("Cell ({0} {1})", c, r));
             }
         }
     }
 
-    private void MakeCells(GameObject cellPrefab, GameObject CellsPanel, int c, int r, float cellSize)
+    private void SetStartCellNumSettings(int count)
+    {
+        int limitCount = 0;
+        Debug.Log("before");
+        while (limitCount < settingLimitNum)
+        {
+            Debug.Log(limitCount);
+            int col = Random.Range(0, count);
+            int row = Random.Range(0, count);
+
+            if (IsEmpty(col, row))
+            {
+                DrawCellNum(cellNumPrefab, cellNumPanel, col, row);
+                limitCount++;
+            }
+        }
+        Debug.Log("after");
+    }
+
+    private bool IsEmpty(int col, int row)
+    {
+        return true;
+    }
+
+    private void DrawCellNum(GameObject cellNumPrefab, GameObject cellNumPanel, int col, int row)
+    {
+        GameObject cel = Instantiate(cellNumPrefab, cellNumPanel.transform);
+        cel.GetComponent<RectTransform>().localPosition = PointToVector3(col, row);
+    }
+
+    private void DrawCells(GameObject cellPrefab, GameObject CellsPanel, int c, int r, float cellSize, string cellname)
     {
         GameObject cel = Instantiate(cellPrefab, CellsPanel.transform);
         cel.GetComponent<RectTransform>().localPosition = PointToVector3(c, r);
+        cel.name = cellname;
     }
 
     private Vector3 PointToVector3(int col, int row)
