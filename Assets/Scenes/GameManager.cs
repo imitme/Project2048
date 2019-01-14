@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
     public int settingLimitNum = 4;
 
     public float myCellSize;
+    public List<CellNum> cellNums;
 
     public GameObject cellsPanel;
     public GameObject cellPrefab;
@@ -16,10 +17,6 @@ public class GameManager : MonoBehaviour
     public GameObject cellNumPrefab;
 
     private Vector3 firstPos = Vector3.zero;
-
-    public void OnStartButton()
-    {
-    }
 
     private void Start()
     {
@@ -59,10 +56,9 @@ public class GameManager : MonoBehaviour
     private void SetStartCellNumSettings(int count)
     {
         int limitCount = 0;
-        Debug.Log("before");
+
         while (limitCount < settingLimitNum)
         {
-            Debug.Log(limitCount);
             int col = Random.Range(0, count);
             int row = Random.Range(0, count);
 
@@ -72,11 +68,17 @@ public class GameManager : MonoBehaviour
                 limitCount++;
             }
         }
-        Debug.Log("after");
     }
 
     private bool IsEmpty(int col, int row)
     {
+        foreach (CellNum cellNum in cellNums)
+        {
+            if (cellNum.c == col && cellNum.r == row)
+            {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -84,6 +86,11 @@ public class GameManager : MonoBehaviour
     {
         GameObject cel = Instantiate(cellNumPrefab, cellNumPanel.transform);
         cel.GetComponent<RectTransform>().localPosition = PointToVector3(col, row);
+
+        var cellNum = cel.GetComponent<CellNum>();
+        cellNum.c = col;
+        cellNum.r = row;    //참조복사일어나서!!! 뚜둥!!!!ㅋㅋㅋㅋㅋㅋ
+        cellNums.Add(cellNum);
     }
 
     private void DrawCells(GameObject cellPrefab, GameObject CellsPanel, int c, int r, float cellSize, string cellname)
@@ -96,5 +103,17 @@ public class GameManager : MonoBehaviour
     private Vector3 PointToVector3(int col, int row)
     {
         return new Vector3(firstPos.x + col * myCellSize, firstPos.y + row * myCellSize, 0);
+    }
+
+    private CellNum GetTile(int col, int row)
+    {
+        foreach (CellNum cellNum in cellNums)
+        {
+            if (cellNum.c == col && cellNum.r == row)
+            {
+                return cellNum;
+            }
+        }
+        return null;
     }
 }
