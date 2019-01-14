@@ -21,11 +21,11 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         int count = 4;
-        Vector2 firstPosition = SetGridMap(count);
-        SetCell(count, firstPosition);
+        SetGridMap(count);
+        SetCells(count);
     }
 
-    private Vector2 SetGridMap(int count)
+    private void SetGridMap(int count)
     {
         var myPanel = cellsPanel.GetComponent<RectTransform>();
         Vector2 myPanelSize = myPanel.sizeDelta;
@@ -38,30 +38,21 @@ public class GameManager : MonoBehaviour
 
         var cellSize = myPanelSize.x / count;
         myCellSize = cellSize;
-
-        //Image cel = Instantiate(cell, panel.transform);
-        //cel.rectTransform.localPosition = firstPosition;
-
-        //Image cel2 = Instantiate(cell, panel.transform);
-        //cel2.rectTransform.localPosition = firstPosition + new Vector2(cellSize, 0);
-
-        return firstPosition;
     }
 
-    private void SetCell(int count, Vector2 firstPosition)
+    private void SetCells(int count)
     {
         Vector2 span = new Vector2(0, 0);
-        span = firstPosition;
         for (int c = 0; c < count; c++)
         {
             for (int r = 0; r < count; r++)
             {
-                MakeTile(cellPrefab, cellsPanel, c, r, myCellSize);
+                MakeCells(cellPrefab, cellsPanel, c, r, myCellSize);
             }
         }
     }
 
-    private void MakeTile(GameObject cellPrefab, GameObject CellsPanel, int c, int r, float cellSize)
+    private void MakeCells(GameObject cellPrefab, GameObject CellsPanel, int c, int r, float cellSize)
     {
         GameObject cel = Instantiate(cellPrefab, CellsPanel.transform);
         cel.GetComponent<RectTransform>().localPosition = PointToVector3(c, r);
