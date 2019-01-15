@@ -116,4 +116,45 @@ public class GameManager : MonoBehaviour
         }
         return null;
     }
+
+    public void OnR_Button()
+    {
+        int col = +1;
+        MoveCells(col, 0);
+    }
+
+    public void OnL_Button()
+    {
+        int col = -1;
+        MoveCells(col, 0);
+    }
+
+    public void OnT_Button()
+    {
+        int row = +1;
+        MoveCells(0, row);
+    }
+
+    public void OnB_Button()
+    {
+        int row = -1;
+        MoveCells(0, row);
+    }
+
+    private void MoveCells(int col, int row)
+    {
+        Debug.Log(col + " -- " + row);
+
+        foreach (var cell in cellNums)
+        {
+            cell.r += row;
+            cell.c += col;
+            MovingCells(cell, cell.c, cell.r);
+        }
+    }
+
+    private void MovingCells(CellNum cell, int col, int row)
+    {
+        cell.GetComponent<RectTransform>().localPosition = PointToVector3(col, row);
+    }
 }
