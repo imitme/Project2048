@@ -5,8 +5,10 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
-    public InputField count;
-    public int settingLimitNum = 4;
+    //public InputField count;
+    public int count = 4;
+
+    public int firstSettingLimitNum = 1;
 
     public float myCellSize;
     public List<CellNum> cellNums;
@@ -20,11 +22,10 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        int count = 4;
         SetGridMap(count);
         SetCells(count);
 
-        SetStartCellNumSettings(count);
+        DrawRandomCells(count, firstSettingLimitNum);
     }
 
     private void SetGridMap(int count)
@@ -53,11 +54,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void SetStartCellNumSettings(int count)
+    private void DrawRandomCells(int count, int totalCellNum)
     {
         int limitCount = 0;
 
-        while (limitCount < settingLimitNum)
+        while (limitCount < totalCellNum)
         {
             int col = Random.Range(0, count);
             int row = Random.Range(0, count);
@@ -87,9 +88,11 @@ public class GameManager : MonoBehaviour
         GameObject cel = Instantiate(cellNumPrefab, cellNumPanel.transform);
         cel.GetComponent<RectTransform>().localPosition = PointToVector3(col, row);
 
+        //cel.GetComponent<Image>().color = Random.ColorHSV();
+
         var cellNum = cel.GetComponent<CellNum>();
         cellNum.c = col;
-        cellNum.r = row;    //참조복사일어나서!!! 뚜둥!!!!ㅋㅋㅋㅋㅋㅋ
+        cellNum.r = row;
         cellNums.Add(cellNum);
     }
 
@@ -120,41 +123,69 @@ public class GameManager : MonoBehaviour
     public void OnR_Button()
     {
         int col = +1;
-        MoveCells(col, 0);
+
+        bool moveCellCheck = MoveCells(col, 0);
+        DrawOneCell(moveCellCheck);
     }
 
     public void OnL_Button()
     {
         int col = -1;
-        MoveCells(col, 0);
+        bool moveCellCheck = MoveCells(col, 0);
+        DrawOneCell(moveCellCheck);
     }
 
     public void OnT_Button()
     {
         int row = +1;
-        MoveCells(0, row);
+        bool moveCellCheck = MoveCells(0, row);
+        DrawOneCell(moveCellCheck);
     }
 
     public void OnB_Button()
     {
         int row = -1;
-        MoveCells(0, row);
+        bool moveCellCheck = MoveCells(0, row);
+        DrawOneCell(moveCellCheck);
     }
 
-    private void MoveCells(int col, int row)
+    private bool MoveCells(int col, int row)
     {
-        Debug.Log(col + " -- " + row);
-
+        int movingCheck = 0;
         foreach (var cell in cellNums)
         {
-            cell.r += row;
-            cell.c += col;
-            MovingCells(cell, cell.c, cell.r);
+            var nextR = cell.r;
+            var nextC = cell.c;
+            nextR += row;
+            nextC += col;
+            if (true)
+            {
+                cell.r = nextR;
+                cell.c = nextC;
+                MovingCells(cell, cell.c, cell.r);
+                movingCheck++;
+            }
         }
+
+        if (movingCheck > 0)
+        {
+            return true;
+        }
+        else
+            return false;
     }
 
     private void MovingCells(CellNum cell, int col, int row)
     {
         cell.GetComponent<RectTransform>().localPosition = PointToVector3(col, row);
+    }
+
+    private void DrawOneCell(bool isMove)
+    {
+        if (isMove)
+        {
+            DrawRandomCells(count, 1);
+            Debug.Log("Draw One Cell");
+        }
     }
 }

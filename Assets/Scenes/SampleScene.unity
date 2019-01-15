@@ -670,8 +670,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5adb6af66b32a1147a3dfeb009946069, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  count: {fileID: 267687082}
-  settingLimitNum: 4
+  count: 4
+  firstSettingLimitNum: 1
   myCellSize: 0
   cellNums: []
   cellsPanel: {fileID: 872201795}
