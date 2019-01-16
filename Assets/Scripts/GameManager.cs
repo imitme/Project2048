@@ -3,29 +3,115 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+public enum DIRECTION
+{
+    TOP = 0, DOWN, RIGHT, BOTTOM, COUNT
+};
+
 public class GameManager : MonoBehaviour
 {
     //public InputField count;
     public int count = 4;
 
+    private DIRECTION dir;
     public int firstSettingLimitNum = 1;
 
     public float myCellSize;
     public List<CellNum> cellNums;
 
     public GameObject cellsPanel;
+    public GameObject cellsNumPanel;
     public GameObject cellPrefab;
-    public GameObject cellNumPanel;
     public GameObject cellNumPrefab;
+
+    public GameObject endPanel;
+    public GameObject playPanel;
 
     private Vector3 firstPos = Vector3.zero;
 
     private void Start()
     {
+        Endgame();
+    }
+
+    private void Endgame()
+    {
+        endPanel.SetActive(true);
+        playPanel.SetActive(false);
+    }
+
+    public void OnPlayButton()
+    {
+        PlayGameStart();
+    }
+
+    public void OnEndButton()
+    {
+        Endgame();
+    }
+
+    public void OnR_Button()
+    {
+        dir = DIRECTION.RIGHT;
+        int col = +1;
+        int row = 0;
+
+        Movemove(col, row);
+    }
+
+    public void OnL_Button()
+    {
+        int col = -1;
+        int row = 0;
+        Movemove(col, row);
+    }
+
+    public void OnT_Button()
+    {
+        int col = 0;
+        int row = +1;
+        Movemove(col, row);
+    }
+
+    public void OnB_Button()
+    {
+        int col = 0;
+        int row = -1;
+
+        Movemove(col, row);
+    }
+
+    private void PlayGameStart()
+    {
+        endPanel.SetActive(false);
+        playPanel.SetActive(true);
+
+        //RESET
+        deleteCellsPanel();
+        deleteCeelsNumPanel();
+        //
+
         SetGridMap(count);
         SetCells(count);
-
         DrawRandomCells(count, firstSettingLimitNum);
+    }
+
+    private void deleteCellsPanel()
+    {
+        RectTransform[] celsPanel = cellsPanel.GetComponentsInChildren<RectTransform>();
+        for (int i = 1; i < celsPanel.Length; i++)
+        {
+            Destroy(celsPanel[i].gameObject);
+        }
+    }
+
+    private void deleteCeelsNumPanel()
+    {
+        RectTransform[] celsNumPanel = cellsNumPanel.GetComponentsInChildren<RectTransform>();
+        for (int i = 1; i < celsNumPanel.Length; i++)
+        {
+            Destroy(celsNumPanel[i].gameObject);
+        }
     }
 
     private void SetGridMap(int count)
@@ -54,6 +140,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    private void DrawCells(GameObject cellPrefab, GameObject CellsPanel, int c, int r, float cellSize, string cellname)
+    {
+        GameObject cel = Instantiate(cellPrefab, CellsPanel.transform);
+        cel.GetComponent<RectTransform>().localPosition = PointToVector3(c, r);
+        cel.name = cellname;
+    }
+
     private void DrawRandomCells(int count, int totalCellNum)
     {
         int limitCount = 0;
@@ -65,7 +158,7 @@ public class GameManager : MonoBehaviour
 
             if (IsEmpty(col, row))
             {
-                DrawCellNum(cellNumPrefab, cellNumPanel, col, row);
+                DrawCellNum(cellNumPrefab, cellsNumPanel, col, row);
                 limitCount++;
             }
         }
@@ -96,13 +189,6 @@ public class GameManager : MonoBehaviour
         cellNums.Add(cellNum);
     }
 
-    private void DrawCells(GameObject cellPrefab, GameObject CellsPanel, int c, int r, float cellSize, string cellname)
-    {
-        GameObject cel = Instantiate(cellPrefab, CellsPanel.transform);
-        cel.GetComponent<RectTransform>().localPosition = PointToVector3(c, r);
-        cel.name = cellname;
-    }
-
     private Vector3 PointToVector3(int col, int row)
     {
         return new Vector3(firstPos.x + col * myCellSize, firstPos.y + row * myCellSize, 0);
@@ -120,33 +206,37 @@ public class GameManager : MonoBehaviour
         return null;
     }
 
-    public void OnR_Button()
+    private void Movemove(int col, int row)
     {
-        int col = +1;
+        CheckDirection(col, row);
+        // GetCells(col, row);
 
-        bool moveCellCheck = MoveCells(col, 0);
+        bool moveCellCheck = MoveCells(col, row);
         DrawOneCell(moveCellCheck);
     }
 
-    public void OnL_Button()
+    private void CheckDirection(int col, int row)
     {
-        int col = -1;
-        bool moveCellCheck = MoveCells(col, 0);
-        DrawOneCell(moveCellCheck);
-    }
+        switch (dir)
+        {
+            case DIRECTION.TOP:
+                break;
 
-    public void OnT_Button()
-    {
-        int row = +1;
-        bool moveCellCheck = MoveCells(0, row);
-        DrawOneCell(moveCellCheck);
-    }
+            case DIRECTION.DOWN:
+                break;
 
-    public void OnB_Button()
-    {
-        int row = -1;
-        bool moveCellCheck = MoveCells(0, row);
-        DrawOneCell(moveCellCheck);
+            case DIRECTION.RIGHT:
+                break;
+
+            case DIRECTION.BOTTOM:
+                break;
+
+            case DIRECTION.COUNT:
+                break;
+
+            default:
+                break;
+        }
     }
 
     private bool MoveCells(int col, int row)
