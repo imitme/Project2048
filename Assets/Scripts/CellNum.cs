@@ -8,6 +8,9 @@ public class CellNum : MonoBehaviour
     public int c = 0;   //행
     public int r = 0;   //열
 
+    public int colCount = 0;
+    public int rowCount = 0;
+
     private int num;
     private Text txt;
 

@@ -1008,9 +1008,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   count: 4
-  firstSettingLimitNum: 1
+  firstSettingLimitNum: 4
   myCellSize: 0
-  cellNums: []
+  cellsNum: []
   cellsPanel: {fileID: 872201795}
   cellsNumPanel: {fileID: 739097348}
   cellPrefab: {fileID: 6530127483351049251, guid: 6adff6c654e98b04db1161c2c25465e7,

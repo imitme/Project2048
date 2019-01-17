@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public enum DIRECTION
 {
-    TOP = 0, DOWN, RIGHT, BOTTOM, COUNT
+    UP = 0, DOWN, RIGHT, LIGHT, COUNT
 };
 
 public class GameManager : MonoBehaviour
@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
     public int firstSettingLimitNum = 1;
 
     public float myCellSize;
-    public List<CellNum> cellNums;
+    public List<CellNum> cellsNum;
 
     public GameObject cellsPanel;
     public GameObject cellsNumPanel;
@@ -53,32 +53,135 @@ public class GameManager : MonoBehaviour
     public void OnR_Button()
     {
         dir = DIRECTION.RIGHT;
-        int col = +1;
-        int row = 0;
-
-        Movemove(col, row);
+        MovetoDir(dir);
     }
 
     public void OnL_Button()
     {
-        int col = -1;
-        int row = 0;
-        Movemove(col, row);
+        dir = DIRECTION.LIGHT;
+        //int col = -1;
+        //int row = 0;
+        //TestMovemove(col, row);
+        MovetoDir(dir);
     }
 
-    public void OnT_Button()
+    public void OnU_Button()
     {
-        int col = 0;
-        int row = +1;
-        Movemove(col, row);
+        dir = DIRECTION.UP;
+        MovetoDir(dir);
     }
 
-    public void OnB_Button()
+    public void OnD_Button()
     {
-        int col = 0;
-        int row = -1;
+        //int col = 0;
+        //int row = -1;
+        //TestMovemove(col, row);
 
-        Movemove(col, row);
+        dir = DIRECTION.DOWN;
+        MovetoDir(dir);
+    }
+
+    private void MovetoDir(DIRECTION dir)
+    {
+        //
+        GetCellsDirLine(dir);
+    }
+
+    private void GetCellsDirLine(DIRECTION dir)
+    {
+        //List<CellNum> cellsDirList;
+        switch (dir)
+        {
+            case DIRECTION.UP:
+                MoveMoveCells(0, 1);
+                break;
+
+            case DIRECTION.DOWN:
+                MoveMoveCells(0, -1);
+                break;
+
+            case DIRECTION.RIGHT:
+                MoveMoveCells(1, 0);
+                break;
+
+            case DIRECTION.LIGHT:
+                MoveMoveCells(-1, 0);
+                break;
+
+            case DIRECTION.COUNT:
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void MoveMoveCells(int col, int row)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            List<CellNum> celLine = new List<CellNum>();
+
+            // 행마다 리스트뽑기
+            foreach (var cel in cellsNum)
+            {
+                if (row == 0)
+                {
+                    if (i == cel.r)
+                    {
+                        var cellinline = GetCellNum(cel.c, cel.r);
+                        celLine.Add(cellinline);
+                    }
+                }
+                else
+                {
+                    if (i == cel.c)
+                    {
+                        var cellinline = GetCellNum(cel.c, cel.r);
+                        celLine.Add(cellinline);
+                    }
+                }
+            }
+
+            foreach (var cel in celLine)
+            {
+                Debug.Log(cel.c + "," + cel.r);
+            }
+        }
+    }
+
+    private void SaveCurrLine(int col, int row)
+    {
+        if (row == 0)
+        {
+            for (int rowCount = 0; rowCount < count; rowCount++)
+            {
+                int sortCount = 1;
+                foreach (var celNum in cellsNum)
+                {
+                    if (celNum.r == rowCount)
+                    {
+                        celNum.rowCount = sortCount;
+                        sortCount++;
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int colCount = 0; colCount < count; colCount++)
+            {
+                int sortCount = 1;
+                foreach (var celNum in cellsNum)
+                {
+                    if (celNum.c == colCount)
+                    {
+                        celNum.colCount = sortCount;
+                        sortCount++;
+                    }
+                }
+            }
+        }
     }
 
     private void PlayGameStart()
@@ -89,7 +192,8 @@ public class GameManager : MonoBehaviour
         //RESET
         deleteCellsPanel();
         deleteCeelsNumPanel();
-        //
+        cellsNum.Clear();   //리스트.Clear() ;
+                            //
 
         SetGridMap(count);
         SetCells(count);
@@ -135,7 +239,7 @@ public class GameManager : MonoBehaviour
         {
             for (int r = 0; r < count; r++)
             {
-                DrawCells(cellPrefab, cellsPanel, c, r, myCellSize, string.Format("Cell ({0} {1})", c, r));
+                DrawCells(cellPrefab, cellsPanel, c, r, myCellSize, string.Format("Cell ({0}, {1})", c, r));
             }
         }
     }
@@ -166,7 +270,7 @@ public class GameManager : MonoBehaviour
 
     private bool IsEmpty(int col, int row)
     {
-        foreach (CellNum cellNum in cellNums)
+        foreach (CellNum cellNum in cellsNum)
         {
             if (cellNum.c == col && cellNum.r == row)
             {
@@ -186,7 +290,8 @@ public class GameManager : MonoBehaviour
         var cellNum = cel.GetComponent<CellNum>();
         cellNum.c = col;
         cellNum.r = row;
-        cellNums.Add(cellNum);
+        cellNum.name = string.Format("({0}, {1})", cellNum.c, cellNum.r);
+        cellsNum.Add(cellNum);
     }
 
     private Vector3 PointToVector3(int col, int row)
@@ -194,9 +299,9 @@ public class GameManager : MonoBehaviour
         return new Vector3(firstPos.x + col * myCellSize, firstPos.y + row * myCellSize, 0);
     }
 
-    private CellNum GetTile(int col, int row)
+    private CellNum GetCellNum(int col, int row)
     {
-        foreach (CellNum cellNum in cellNums)
+        foreach (CellNum cellNum in cellsNum)
         {
             if (cellNum.c == col && cellNum.r == row)
             {
@@ -206,43 +311,18 @@ public class GameManager : MonoBehaviour
         return null;
     }
 
-    private void Movemove(int col, int row)
+    private void TestMovemove(int col, int row)
     {
-        CheckDirection(col, row);
         // GetCells(col, row);
 
         bool moveCellCheck = MoveCells(col, row);
         DrawOneCell(moveCellCheck);
     }
 
-    private void CheckDirection(int col, int row)
-    {
-        switch (dir)
-        {
-            case DIRECTION.TOP:
-                break;
-
-            case DIRECTION.DOWN:
-                break;
-
-            case DIRECTION.RIGHT:
-                break;
-
-            case DIRECTION.BOTTOM:
-                break;
-
-            case DIRECTION.COUNT:
-                break;
-
-            default:
-                break;
-        }
-    }
-
     private bool MoveCells(int col, int row)
     {
         int movingCheck = 0;
-        foreach (var cell in cellNums)
+        foreach (var cell in cellsNum)
         {
             var nextR = cell.r;
             var nextC = cell.c;
