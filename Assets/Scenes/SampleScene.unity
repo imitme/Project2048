@@ -1480,7 +1480,7 @@ GameObject:
   - component: {fileID: 939714749}
   - component: {fileID: 939714748}
   m_Layer: 5
-  m_Name: T
+  m_Name: U
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1547,7 +1547,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 719015415}
-        m_MethodName: OnT_Button
+        m_MethodName: OnU_Button
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2151,7 +2151,7 @@ GameObject:
   - component: {fileID: 1693099012}
   - component: {fileID: 1693099011}
   m_Layer: 5
-  m_Name: B
+  m_Name: D
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2218,7 +2218,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 719015415}
-        m_MethodName: OnB_Button
+        m_MethodName: OnD_Button
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
