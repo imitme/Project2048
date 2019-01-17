@@ -93,19 +93,19 @@ public class GameManager : MonoBehaviour
         switch (dir)
         {
             case DIRECTION.UP:
-                MoveMoveCells(0, 1);
+                MoveMoveCells(dir, 0, 1, count - 1);
                 break;
 
             case DIRECTION.DOWN:
-                MoveMoveCells(0, -1);
+                MoveMoveCells(dir, 0, -1, 0);
                 break;
 
             case DIRECTION.RIGHT:
-                MoveMoveCells(1, 0);
+                MoveMoveCells(dir, 1, 0, count - 1);
                 break;
 
             case DIRECTION.LIGHT:
-                MoveMoveCells(-1, 0);
+                MoveMoveCells(dir, -1, 0, 0);
                 break;
 
             case DIRECTION.COUNT:
@@ -116,7 +116,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void MoveMoveCells(int col, int row)
+    private void MoveMoveCells(DIRECTION dir, int col, int row, int startPoint)
     {
         for (int i = 0; i < count; i++)
         {
@@ -143,21 +143,62 @@ public class GameManager : MonoBehaviour
                 }
             }
 
-            //줄 내 리스트 정렬!
-            if (row == 0 && col > 0)
-                celLine.Sort((a, b) => a.c.CompareTo(b.c));
-            else if (row == 0 && col < 0)
-                celLine.Sort((a, b) => b.c.CompareTo(a.c));
-            else if (col == 0 && row > 0)
-                celLine.Sort((a, b) => a.r.CompareTo(b.r));
-            else
-                celLine.Sort((a, b) => b.r.CompareTo(a.r));
-            //
-
             foreach (var cel in celLine)
             {
                 Debug.Log(cel.c + "," + cel.r);
             }
+
+            //줄 내 리스트 정렬! 후 이동!
+            int copyStartPoint = startPoint;    //초기화*************************************
+            switch (dir)
+            {
+                case DIRECTION.UP:
+                    celLine.Sort((a, b) => a.r.CompareTo(b.r));
+
+                    foreach (var cel in celLine)
+                    {
+                        MovingCell(cel, cel.c, copyStartPoint);
+                        copyStartPoint--;
+                    }
+                    break;
+
+                case DIRECTION.DOWN:
+                    celLine.Sort((a, b) => b.r.CompareTo(a.r));
+                    foreach (var cel in celLine)
+                    {
+                        MovingCell(cel, cel.c, copyStartPoint);
+                        copyStartPoint++;
+                    }
+                    break;
+
+                case DIRECTION.RIGHT:
+                    celLine.Sort((a, b) => a.c.CompareTo(b.c));
+                    foreach (var cel in celLine)
+                    {
+                        MovingCell(cel, copyStartPoint, cel.r);
+                        copyStartPoint--;
+                    }
+                    break;
+
+                case DIRECTION.LIGHT:
+                    celLine.Sort((a, b) => b.c.CompareTo(a.c));
+                    foreach (var cel in celLine)
+                    {
+                        MovingCell(cel, copyStartPoint, cel.r);
+                        copyStartPoint++;
+                    }
+                    break;
+
+                case DIRECTION.COUNT:
+                    break;
+
+                default:
+                    break;
+            }
+
+            //이동
+
+            //
         }
     }
 
@@ -322,43 +363,12 @@ public class GameManager : MonoBehaviour
         return null;
     }
 
-    private void TestMovemove(int col, int row)
-    {
-        // GetCells(col, row);
-
-        bool moveCellCheck = MoveCells(col, row);
-        DrawOneCell(moveCellCheck);
-    }
-
-    private bool MoveCells(int col, int row)
-    {
-        int movingCheck = 0;
-        foreach (var cell in cellsNum)
-        {
-            var nextR = cell.r;
-            var nextC = cell.c;
-            nextR += row;
-            nextC += col;
-            if (true)
-            {
-                cell.r = nextR;
-                cell.c = nextC;
-                MovingCells(cell, cell.c, cell.r);
-                movingCheck++;
-            }
-        }
-
-        if (movingCheck > 0)
-        {
-            return true;
-        }
-        else
-            return false;
-    }
-
-    private void MovingCells(CellNum cell, int col, int row)
+    private void MovingCell(CellNum cell, int col, int row)
     {
         cell.GetComponent<RectTransform>().localPosition = PointToVector3(col, row);
+
+        cell.c = col;
+        cell.r = row;
     }
 
     private void DrawOneCell(bool isMove)
