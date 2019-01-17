@@ -143,6 +143,17 @@ public class GameManager : MonoBehaviour
                 }
             }
 
+            //줄 내 리스트 정렬!
+            if (row == 0 && col > 0)
+                celLine.Sort((a, b) => a.c.CompareTo(b.c));
+            else if (row == 0 && col < 0)
+                celLine.Sort((a, b) => b.c.CompareTo(a.c));
+            else if (col == 0 && row > 0)
+                celLine.Sort((a, b) => a.r.CompareTo(b.r));
+            else
+                celLine.Sort((a, b) => b.r.CompareTo(a.r));
+            //
+
             foreach (var cel in celLine)
             {
                 Debug.Log(cel.c + "," + cel.r);
