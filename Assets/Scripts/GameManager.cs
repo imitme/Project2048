@@ -113,71 +113,57 @@ public class GameManager : MonoBehaviour
     private bool MoveMoveCells(DIRECTION dir, int col, int row, int startPoint)
     {
         bool checkMove = false;
-        int moveCount = 0;
+
         for (int i = 0; i < count; i++)
         {
             List<CellNum> celLine = new List<CellNum>();
 
-            // 행마다 리스트뽑기
-            foreach (var cel in cellsNum)
-            {
-                if (row == 0)
-                {
-                    if (i == cel.r)
-                    {
-                        var cellinline = GetCellNum(cel.c, cel.r);
-                        celLine.Add(cellinline);
-                    }
-                }
-                else
-                {
-                    if (i == cel.c)
-                    {
-                        var cellinline = GetCellNum(cel.c, cel.r);
-                        celLine.Add(cellinline);
-                    }
-                }
-            }
+            GetJustOneLineList(celLine, i, row);
 
-            //줄 내 리스트 정렬! 후 이동!
+            //줄 내 리스트 정렬! > " 계산하고 " >  이동!
             int movePoint = startPoint;    //초기화*************************************
             switch (dir)
             {
                 case DIRECTION.UP:
-                    celLine.Sort((a, b) => a.r.CompareTo(b.r));
-
+                    celLine.Sort((a, b) => b.r.CompareTo(a.r));
                     foreach (var cel in celLine)
                     {
-                        MovingCell(cel, cel.c, movePoint);
+                        checkMove = MovingCell(checkMove, cel, cel.c, movePoint);
+                        Debug.Log(checkMove);
                         movePoint--;
                     }
                     break;
 
                 case DIRECTION.DOWN:
-                    celLine.Sort((a, b) => b.r.CompareTo(a.r));
+                    celLine.Sort((a, b) => a.r.CompareTo(b.r));
                     foreach (var cel in celLine)
                     {
-                        MovingCell(cel, cel.c, movePoint);
+                        checkMove = MovingCell(checkMove, cel, cel.c, movePoint);
+                        Debug.Log(checkMove);
                         movePoint++;
                     }
                     break;
 
                 case DIRECTION.RIGHT:
-                    celLine.Sort((a, b) => a.c.CompareTo(b.c));
-                    foreach (var cel in celLine)
-                    {
-                        MovingCell(cel, movePoint, cel.r);
-                        movePoint--;
-                    }
-                    break;
-
-                case DIRECTION.LIGHT:
                     celLine.Sort((a, b) => b.c.CompareTo(a.c));
                     foreach (var cel in celLine)
                     {
-                        MovingCell(cel, movePoint, cel.r);
+                        checkMove = MovingCell(checkMove, cel, movePoint, cel.r);
+                        Debug.Log(checkMove);
+                        movePoint--;
+                    }
+
+                    break;
+
+                case DIRECTION.LIGHT:
+                    celLine.Sort((a, b) => a.c.CompareTo(b.c));
+                    foreach (var cel in celLine)
+                    {
+                        checkMove = MovingCell(checkMove, cel, movePoint, cel.r);
+                        Debug.Log(checkMove);
                         movePoint++;
                     }
+
                     break;
 
                 case DIRECTION.COUNT:
@@ -186,19 +172,37 @@ public class GameManager : MonoBehaviour
                 default:
                     break;
             }
+        }
 
-            if (movePoint != startPoint)
+        return checkMove;
+    }
+
+    private void GetJustOneLineList(List<CellNum> cellLine, int i, int row)
+    {
+        // 행마다 리스트뽑기
+        foreach (var cel in cellsNum)
+        {
+            if (row == 0)
             {
-                moveCount++;
+                if (i == cel.r)
+                {
+                    var cellinline = GetCellNum(cel.c, cel.r);
+                    cellLine.Add(cellinline);
+                }
+            }
+            else
+            {
+                if (i == cel.c)
+                {
+                    var cellinline = GetCellNum(cel.c, cel.r);
+                    cellLine.Add(cellinline);
+                }
             }
         }
+    }
 
-        if (moveCount != 0)
-        {
-            checkMove = true;
-        }
-        Debug.Log("처음숫자" + startPoint + "움직였는지 " + moveCount + "--" + checkMove);
-        return checkMove;
+    private void MergeCells(List<CellNum> cellNum)
+    {
     }
 
     private CellNum GetCellNum(int col, int row)
@@ -323,12 +327,21 @@ public class GameManager : MonoBehaviour
         cellsNum.Add(cellNum);
     }
 
-    private void MovingCell(CellNum cell, int col, int row)
+    private bool MovingCell(bool checkMove, CellNum cell, int col, int row)
     {
-        cell.GetComponent<RectTransform>().localPosition = PointToVector3(col, row);
+        Debug.Log(string.Format("현재 : {0},{1} > 변경 : {2},{3}", cell.c, cell.r, col, row));
+        if (cell.c == col && cell.r == row)
+        {
+            checkMove = false;
+            return checkMove;
+        }
 
         cell.c = col;
         cell.r = row;
+
+        cell.GetComponent<RectTransform>().localPosition = PointToVector3(col, row);
+        checkMove = true;
+        return checkMove;
     }
 
     private Vector3 PointToVector3(int col, int row)
@@ -338,10 +351,11 @@ public class GameManager : MonoBehaviour
 
     private void DrawOneCell(bool isMove)
     {
-        if (isMove)
+        if (!isMove)
+            return;
+        else if (isMove)
         {
             DrawRandomCells(count, 1);
-            Debug.Log("Draw One Cell");
         }
     }
 }
