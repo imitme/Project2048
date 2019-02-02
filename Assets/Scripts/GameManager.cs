@@ -5,13 +5,13 @@ using UnityEngine.UI;
 
 public enum DIRECTION
 {
-    UP = 0, DOWN, RIGHT, LIGHT, COUNT
+    UP = 0, DOWN, RIGHT, LEFT, COUNT
 };
 
 public class GameManager : MonoBehaviour
 {
     //public InputField count;
-    public int count = 4;
+    public int totalCount = 4;
 
     private DIRECTION dir;
     public int firstSettingLimitNum = 1;
@@ -58,7 +58,7 @@ public class GameManager : MonoBehaviour
 
     public void OnL_Button()
     {
-        dir = DIRECTION.LIGHT;
+        dir = DIRECTION.LEFT;
         MovetoDir(dir);
     }
 
@@ -76,28 +76,42 @@ public class GameManager : MonoBehaviour
 
     private void MovetoDir(DIRECTION dir)
     {
-        DrawOneCell(GetCellsDirLine(dir));
+        CheckEmpthOriginalList();
+        bool isMove = GetCellsDirLine(dir);
+
+        DrawOneCell(isMove);
     }
 
     private bool GetCellsDirLine(DIRECTION dir)
     {
         bool checkMove = false;
+        int dirCol = 0;
+        int dirRow = 0;
+        int startPoint = 0;
+
         switch (dir)
         {
             case DIRECTION.UP:
-                checkMove = MoveMoveCells(dir, 0, 1, count - 1);
+                dirRow = 1;
+                startPoint = totalCount - 1;
+
                 break;
 
             case DIRECTION.DOWN:
-                checkMove = MoveMoveCells(dir, 0, -1, 0);
+                dirRow = -1;
+
                 break;
 
             case DIRECTION.RIGHT:
-                checkMove = MoveMoveCells(dir, 1, 0, count - 1);
+                dirCol = 1;
+                startPoint = totalCount - 1;
+                //  TestMergeCells(dir, dirCol, dirRow, startPoint);
+                //   checkMove = MoveCells(dir, 1, 0, totalCount - 1);
                 break;
 
-            case DIRECTION.LIGHT:
-                checkMove = MoveMoveCells(dir, -1, 0, 0);
+            case DIRECTION.LEFT:
+                dirCol = -1;
+
                 break;
 
             case DIRECTION.COUNT:
@@ -107,63 +121,65 @@ public class GameManager : MonoBehaviour
                 break;
         }
 
+        checkMove = MoveCells(dir, dirCol, dirRow, startPoint);
+
         return checkMove;
     }
 
-    private bool MoveMoveCells(DIRECTION dir, int col, int row, int startPoint)
+    private bool MoveCells(DIRECTION dir, int dirCol, int dirRow, int startPoint)
     {
         bool checkMove = false;
+        bool checkMerge = false;
+        int checkMergeCount = 0;
+        int checkMoveCount = 0;
 
-        for (int i = 0; i < count; i++)
+        for (int lineCount = 0; lineCount < totalCount; lineCount++)
         {
+            int movePoint = startPoint;
             List<CellNum> celLine = new List<CellNum>();
 
-            GetJustOneLineList(celLine, i, row);
+            GetJustOneLineList(celLine, lineCount, dirRow);
 
-            //줄 내 리스트 정렬! > " 계산하고 " >  이동!
-            int movePoint = startPoint;    //초기화*************************************
             switch (dir)
             {
                 case DIRECTION.UP:
                     celLine.Sort((a, b) => b.r.CompareTo(a.r));
-                    foreach (var cel in celLine)
-                    {
-                        checkMove = MovingCell(checkMove, cel, cel.c, movePoint);
-                        Debug.Log(checkMove);
-                        movePoint--;
-                    }
+                    checkMerge = MergeCellNum(celLine);
+                    if (checkMerge == true)
+                        checkMergeCount++;
+                    checkMove = UpMove(celLine, checkMove, movePoint);
+                    if (checkMove == true)
+                        checkMoveCount++;
                     break;
 
                 case DIRECTION.DOWN:
                     celLine.Sort((a, b) => a.r.CompareTo(b.r));
-                    foreach (var cel in celLine)
-                    {
-                        checkMove = MovingCell(checkMove, cel, cel.c, movePoint);
-                        Debug.Log(checkMove);
-                        movePoint++;
-                    }
+                    checkMerge = MergeCellNum(celLine);
+                    if (checkMerge == true)
+                        checkMergeCount++;
+                    checkMove = DownMove(celLine, checkMove, movePoint);
+                    if (checkMove == true)
+                        checkMoveCount++;
                     break;
 
                 case DIRECTION.RIGHT:
                     celLine.Sort((a, b) => b.c.CompareTo(a.c));
-                    foreach (var cel in celLine)
-                    {
-                        checkMove = MovingCell(checkMove, cel, movePoint, cel.r);
-                        Debug.Log(checkMove);
-                        movePoint--;
-                    }
-
+                    checkMerge = MergeCellNum(celLine);
+                    if (checkMerge == true)
+                        checkMergeCount++;
+                    checkMove = RightMove(celLine, checkMove, movePoint);
+                    if (checkMove == true)
+                        checkMoveCount++;
                     break;
 
-                case DIRECTION.LIGHT:
+                case DIRECTION.LEFT:
                     celLine.Sort((a, b) => a.c.CompareTo(b.c));
-                    foreach (var cel in celLine)
-                    {
-                        checkMove = MovingCell(checkMove, cel, movePoint, cel.r);
-                        Debug.Log(checkMove);
-                        movePoint++;
-                    }
-
+                    checkMerge = MergeCellNum(celLine);
+                    if (checkMerge == true)
+                        checkMergeCount++;
+                    checkMove = LeftMove(celLine, checkMove, movePoint);
+                    if (checkMove == true)
+                        checkMoveCount++;
                     break;
 
                 case DIRECTION.COUNT:
@@ -174,35 +190,123 @@ public class GameManager : MonoBehaviour
             }
         }
 
+        if (checkMergeCount > 0)
+        {
+            checkMerge = true;
+        }
+        if (checkMoveCount > 0)
+        {
+            checkMove = true;
+        }
+
+        Debug.Log("합쳐졌니? " + checkMerge + "  움직였니? " + checkMove);
+        return checkMerge || checkMove;
+    }
+
+    private bool MergeCellNum(List<CellNum> celLine)
+    {
+        bool checkMove = false;
+        ///정렬된 celLine에 있는 것의 숫자를 비교해!
+        for (int cellPoint = 0; cellPoint < celLine.Count; cellPoint++)
+        {
+            if (cellPoint + 1 >= celLine.Count)
+                break;
+
+            if (celLine[cellPoint].num == celLine[cellPoint + 1].num)
+            {
+                ///합쳐주고
+                int mergeNum = celLine[cellPoint].num;
+                mergeNum += mergeNum;
+                celLine[cellPoint].num = mergeNum;
+
+                ///i+1 없앤다
+                DestroyImmediate(celLine[cellPoint + 1].gameObject);
+                celLine.RemoveAt(cellPoint + 1);
+
+                //움직임체크!
+                checkMove = true;
+            }
+        }
+
+        CheckEmpthOriginalList();
+
         return checkMove;
     }
 
-    private void GetJustOneLineList(List<CellNum> cellLine, int i, int row)
+    private bool UpMove(List<CellNum> celLine, bool checkMove, int movePoint)
     {
-        // 행마다 리스트뽑기
+        foreach (var cel in celLine)
+        {
+            if (cel == null)
+                continue;
+
+            checkMove = SetMovingPointofCell(checkMove, cel, cel.c, movePoint);
+            movePoint--;
+        }
+
+        return checkMove;
+    }
+
+    private bool DownMove(List<CellNum> celLine, bool checkMove, int movePoint)
+    {
+        foreach (var cel in celLine)
+        {
+            if (cel == null)
+                continue;
+
+            checkMove = SetMovingPointofCell(checkMove, cel, cel.c, movePoint);
+            movePoint++;
+        }
+        return checkMove;
+    }
+
+    private bool RightMove(List<CellNum> celLine, bool checkMove, int movePoint)
+    {
+        foreach (var cel in celLine)
+        {
+            if (cel == null)
+                continue;
+
+            checkMove = SetMovingPointofCell(checkMove, cel, movePoint, cel.r);
+            movePoint--;
+        }
+        return checkMove;
+    }
+
+    private bool LeftMove(List<CellNum> celLine, bool checkMove, int movePoint)
+    {
+        foreach (var cel in celLine)
+        {
+            if (cel == null)
+                continue;
+
+            checkMove = SetMovingPointofCell(checkMove, cel, movePoint, cel.r);
+            movePoint++;
+        }
+        return checkMove;
+    }
+
+    private void GetJustOneLineList(List<CellNum> cellLine, int lineCount, int checkLineAsRow)
+    {
         foreach (var cel in cellsNum)
         {
-            if (row == 0)
+            if (checkLineAsRow == 0)    //행 단위로 줄 묶기 //좌우 버튼을 눌렀다는 뜻
             {
-                if (i == cel.r)
+                if (lineCount == cel.r)    //행이 같은 애들 찾아
                 {
                     var cellinline = GetCellNum(cel.c, cel.r);
                     cellLine.Add(cellinline);
                 }
             }
-            else
+            else    //열 단위로 줄 묶기 //위아래 버튼을 눌렀다는 뜻
             {
-                if (i == cel.c)
+                if (lineCount == cel.c)     //열이 같은 애들 찾아.
                 {
                     var cellinline = GetCellNum(cel.c, cel.r);
                     cellLine.Add(cellinline);
                 }
             }
         }
-    }
-
-    private void MergeCells(List<CellNum> cellNum)
-    {
     }
 
     private CellNum GetCellNum(int col, int row)
@@ -224,13 +328,12 @@ public class GameManager : MonoBehaviour
 
         //RESET
         deleteCellsPanel();
-        deleteCeelsNumPanel();
+        deleteCellsNumPanel();
         cellsNum.Clear();   //리스트.Clear() ;
-                            //
 
-        SetGridMap(count);
-        SetCells(count);
-        DrawRandomCells(count, firstSettingLimitNum);
+        SetGridMap(totalCount);
+        SetCells(totalCount);
+        DrawRandomCells(totalCount, firstSettingLimitNum);
     }
 
     private void deleteCellsPanel()
@@ -242,7 +345,7 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    private void deleteCeelsNumPanel()
+    private void deleteCellsNumPanel()
     {
         RectTransform[] celsNumPanel = cellsNumPanel.GetComponentsInChildren<RectTransform>();
         for (int i = 1; i < celsNumPanel.Length; i++)
@@ -260,7 +363,6 @@ public class GameManager : MonoBehaviour
         var firstPositionY = myPanelSize.y / count / 2;
         Vector2 firstPosition = new Vector2(firstPositionX, firstPositionY);
         firstPos = firstPosition;
-        Debug.Log(firstPosition + "----" + firstPos);
 
         var cellSize = myPanelSize.x / count;
         myCellSize = cellSize;
@@ -327,9 +429,8 @@ public class GameManager : MonoBehaviour
         cellsNum.Add(cellNum);
     }
 
-    private bool MovingCell(bool checkMove, CellNum cell, int col, int row)
+    private bool SetMovingPointofCell(bool checkMove, CellNum cell, int col, int row)
     {
-        Debug.Log(string.Format("현재 : {0},{1} > 변경 : {2},{3}", cell.c, cell.r, col, row));
         if (cell.c == col && cell.r == row)
         {
             checkMove = false;
@@ -349,13 +450,19 @@ public class GameManager : MonoBehaviour
         return new Vector3(firstPos.x + col * myCellSize, firstPos.y + row * myCellSize, 0);
     }
 
+    private void CheckEmpthOriginalList()
+    {
+        cellsNum.RemoveAll(cn => cn == null);
+    }
+
     private void DrawOneCell(bool isMove)
     {
+        Debug.Log(isMove);
         if (!isMove)
             return;
         else if (isMove)
         {
-            DrawRandomCells(count, 1);
+            DrawRandomCells(totalCount, 1);
         }
     }
 }
