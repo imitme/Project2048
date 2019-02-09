@@ -268,6 +268,8 @@ public class GameManager : MonoBehaviour
             {
                 ///점수 보내주고
                 sendScoreNum(celLine[currentCell].num);
+                ///mergeAnim
+                celLine[currentCell].StartMergeAnim();
 
                 ///합쳐주고
                 int mergeNum = celLine[currentCell].num;

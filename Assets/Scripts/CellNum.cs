@@ -11,6 +11,8 @@ public class CellNum : MonoBehaviour
     private int _num;
     private Text txt;
 
+    private Animator cellNumAnim = null;
+
     public int num
     {
         get { return _num; }
@@ -24,7 +26,13 @@ public class CellNum : MonoBehaviour
 
     private void Awake()
     {
+        cellNumAnim = GetComponent<Animator>();
         txt = GetComponentInChildren<Text>();
         num = 2;
+    }
+
+    public void StartMergeAnim()
+    {
+        cellNumAnim.SetTrigger("Merge");
     }
 }
