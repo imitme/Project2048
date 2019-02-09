@@ -26,12 +26,28 @@ public class GameManager : MonoBehaviour
 
     public GameObject endPanel;
     public GameObject playPanel;
+    public Text score_Text;
+
+    public int _score = 0;
+
+    private int score
+    {
+        get { return _score; }
+        set { _score = value; score_Text.text = string.Format("Score : {0}", _score); }
+    }
 
     private Vector3 firstPos = Vector3.zero;
 
     private void Start()
     {
         Endgame();
+    }
+
+    private void sendScoreNum(int addScore)
+    {
+        int currentScore = score;
+        currentScore += addScore;
+        score = currentScore;
     }
 
     private void Endgame()
@@ -209,19 +225,25 @@ public class GameManager : MonoBehaviour
         ///정렬된 celLine에 있는 것의 숫자를 비교해!
         for (int cellPoint = 0; cellPoint < celLine.Count; cellPoint++)
         {
-            if (cellPoint + 1 >= celLine.Count)
+            int currentCell = cellPoint;
+            int nextCell = cellPoint + 1;
+
+            if (nextCell >= celLine.Count)
                 break;
 
-            if (celLine[cellPoint].num == celLine[cellPoint + 1].num)
+            if (celLine[currentCell].num == celLine[nextCell].num)
             {
+                ///점수 보내주고
+                sendScoreNum(celLine[currentCell].num);
+
                 ///합쳐주고
-                int mergeNum = celLine[cellPoint].num;
+                int mergeNum = celLine[currentCell].num;
                 mergeNum += mergeNum;
-                celLine[cellPoint].num = mergeNum;
+                celLine[currentCell].num = mergeNum;
 
                 ///i+1 없앤다
-                DestroyImmediate(celLine[cellPoint + 1].gameObject);
-                celLine.RemoveAt(cellPoint + 1);
+                DestroyImmediate(celLine[nextCell].gameObject);
+                celLine.RemoveAt(nextCell);
 
                 //움직임체크!
                 checkMove = true;
