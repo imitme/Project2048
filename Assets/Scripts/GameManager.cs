@@ -24,11 +24,15 @@ public class GameManager : MonoBehaviour
     public GameObject cellPrefab;
     public GameObject cellNumPrefab;
 
-    public GameObject endPanel;
+    public GameObject lobbyPanel;
     public GameObject playPanel;
     public Text score_Text;
 
     public int _score = 0;
+
+    public Animator inGameCanvasAnim;
+    public Animator lobbyCanvasAnim;
+    public Animator playButtonAnim;
 
     private int score
     {
@@ -40,7 +44,7 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        Endgame();
+        OnGotoMenu();
     }
 
     private void sendScoreNum(int addScore)
@@ -50,20 +54,49 @@ public class GameManager : MonoBehaviour
         score = currentScore;
     }
 
-    private void Endgame()
+    private void OnGotoMenu()
     {
-        endPanel.SetActive(true);
+        StartCoroutine(GotoMenuAnim());
+        OnResetPlayerInfo();
+    }
+
+    private IEnumerator GotoMenuAnim()
+    {
+        inGameCanvasAnim.SetTrigger("Stop");
+        lobbyCanvasAnim.SetTrigger("Start");
+        yield return new WaitForSeconds(0.5f);
         playPanel.SetActive(false);
+        lobbyPanel.SetActive(true);
+
+        lobbyCanvasAnim.SetTrigger("Start");
     }
 
     public void OnPlayButton()
     {
+        StartCoroutine(GotoPlay());
+    }
+
+    private IEnumerator GotoPlay()
+    {
+        playButtonAnim.SetTrigger("Press");
+        yield return new WaitForSeconds(0.3f);
+
         PlayGameStart();
     }
 
-    public void OnEndButton()
+    public void OnGotoMenuButton()
     {
-        Endgame();
+        OnGotoMenu();
+    }
+
+    private void OnResetPlayerInfo()
+    {
+        ResetScore();
+    }
+
+    private void ResetScore()
+    {
+        score = 0;
     }
 
     public void OnR_Button()
@@ -345,8 +378,10 @@ public class GameManager : MonoBehaviour
 
     private void PlayGameStart()
     {
-        endPanel.SetActive(false);
+        lobbyPanel.SetActive(false);
         playPanel.SetActive(true);
+
+        inGameCanvasAnim.SetTrigger("Start");
 
         //RESET
         deleteCellsPanel();
