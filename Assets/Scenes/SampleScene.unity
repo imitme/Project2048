@@ -1038,6 +1038,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   totalCount: 4
+  cellMovingTime: 0.1
   firstSettingLimitNum: 4
   myCellSize: 0
   cellsNum: []

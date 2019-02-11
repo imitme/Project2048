@@ -13,6 +13,8 @@ public class GameManager : MonoBehaviour
     //public InputField count;
     public int totalCount = 4;
 
+    public float cellMovingTime = 0.1f;
+
     private DIRECTION dir;
     public int firstSettingLimitNum = 1;
 
@@ -268,19 +270,22 @@ public class GameManager : MonoBehaviour
             {
                 ///점수 보내주고
                 sendScoreNum(celLine[currentCell].num);
+
+                ///움직이고
+
                 ///mergeAnim
                 celLine[currentCell].StartMergeAnim();
 
-                ///합쳐주고
-                int mergeNum = celLine[currentCell].num;
+                ///숫자 합쳐주고.
+                int mergeNum = celLine[nextCell].num;
                 mergeNum += mergeNum;
-                celLine[currentCell].num = mergeNum;
+                celLine[nextCell].num = mergeNum;
 
-                ///i+1 없앤다
-                DestroyImmediate(celLine[nextCell].gameObject);
-                celLine.RemoveAt(nextCell);
+                ///i+1 없앤다 >> 현재셀을 없애는데, 움직시는 시간 지난 후에!
+                DestroyImmediate(celLine[currentCell].gameObject);
+                celLine.RemoveAt(currentCell);
 
-                //움직임체크!
+                ///움직임체크!
                 checkMove = true;
             }
         }
@@ -490,7 +495,12 @@ public class GameManager : MonoBehaviour
 
     private bool SetMovingPointofCell(bool checkMove, CellNum cell, int col, int row)
     {
-        if (cell.c == col && cell.r == row)
+        int currCol = cell.c;
+        int currRow = cell.r;
+        Vector3 currPos = cell.GetComponent<RectTransform>().localPosition;
+        float movingTime = cellMovingTime;
+
+        if (currCol == col && currRow == row)
         {
             checkMove = false;
             return checkMove;
@@ -498,10 +508,27 @@ public class GameManager : MonoBehaviour
 
         cell.c = col;
         cell.r = row;
+        StartCoroutine(OnMoving(cell, currPos, col, row, movingTime));
 
-        cell.GetComponent<RectTransform>().localPosition = PointToVector3(col, row);
         checkMove = true;
         return checkMove;
+    }
+
+    private IEnumerator OnMoving(CellNum movingCell, Vector3 startPos, int targetCol, int targetRow, float movingTime)
+    {
+        Vector3 currPos = startPos;
+        Vector3 goalPos = PointToVector3(targetCol, targetRow);
+        for (float t = 0.0f; t <= movingTime; t += Time.deltaTime)
+        {
+            currPos = Vector3.Lerp(startPos, goalPos, t / movingTime);
+            movingCell.transform.localPosition = currPos;
+            yield return null;  //왜 여기에?????  //렍더기다리는???
+        }
+
+        movingCell.GetComponent<RectTransform>().localPosition = goalPos;
+        /*
+        movingCell.c = targetCol;
+        movingCell.r = targetRow;*/   //
     }
 
     private Vector3 PointToVector3(int col, int row)
